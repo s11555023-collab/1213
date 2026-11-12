@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>學生分組專題登記與查詢系統</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Microsoft JhengHei', 'PingFang TC', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      padding: 30px;
+      border-radius: 15px 15px 0 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .header h1 {
+      color: #2C3E50;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #7f8c8d;
+      font-size: 14px;
+    }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #ecf0f1;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      color: #7f8c8d;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      background: #f8f9fa;
+      color: #2C3E50;
+    }
+
+    .tab.active {
+      color: #E67E22;
+      border-bottom-color: #E67E22;
+      background: #fff5ee;
+    }
+
+    .content {
+      background: white;
+      padding: 30px;
+      border-radius: 0 0 15px 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      min-height: 500px;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.5s;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #2C3E50;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .form-label .required {
+      color: #e74c3c;
+      margin-left: 3px;
+    }
+
+    .form-label .char-count {
+      float: right;
+      color: #95a5a6;
+      font-weight: normal;
+      font-size: 12px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: #E67E22;
+      box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    .members-container {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+
+    .member-item {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border: 2px solid #ecf0f1;
+    }
+
+    .member-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .member-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .member-title {
+      color: #2C3E50;
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .member-remove {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.3s;
+    }
+
+    .member-remove:hover {
+      background: #c0392b;
+    }
+
+    .member-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .add-member-btn {
+      width: 100%;
+      padding: 12px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .add-member-btn:hover {
+      background: #2980b9;
+    }
+
+    .add-member-btn:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+
+    .btn {
+      padding: 14px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #E67E22 0%, #d35400 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(230, 126, 34, 0.5);
+    }
+
+    .btn-primary:disabled {
+      background: #bdc3c7;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .search-box {
+      margin-bottom: 25px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 20px;
+      border: 2px solid #ecf0f1;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .project-card {
+      background: white;
+      border: 2px solid #ecf0f1;
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-color: #E67E22;
+    }
+
+    .project-title {
+      color: #2C3E50;
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .project-info {
+      color: #7f8c8d;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    .project-members {
+      color: #3498db;
+      font-size: 14px;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: #ebf5fb;
+      border-radius: 6px;
+    }
+
+    .project-description {
+      color: #555;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      max-height: 100px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .btn-edit,
+    .btn-detail {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .btn-edit {
+      background: #f39c12;
+      color: white;
+    }
+
+    .btn-edit:hover {
+      background: #e67e22;
+    }
+
+    .btn-detail {
+      background: #3498db;
+      color: white;
+    }
+
+    .btn-detail:hover {
+      background: #2980b9;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      display: none;
+    }
+
+    .loading.active {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #E67E22;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #95a5a6;
+    }
+
+    .empty-state-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-text {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .empty-state-subtext {
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+
+    .modal-header {
+      padding: 25px 30px;
+      border-bottom: 2px solid #ecf0f1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: bold;
+      color: #2C3E50;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 30px;
+      cursor: pointer;
+      color: #95a5a6;
+      padding: 0;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.3s;
+    }
+
+    .modal-close:hover {
+      background: #ecf0f1;
+      color: #e74c3c;
+    }
+
+    .modal-body {
+      padding: 30px;
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      animation: slideIn 0.3s;
+    }
+
+    .toast.active {
+      display: flex;
+    }
+
+    .toast.success {
+      border-left: 4px solid #27ae60;
+    }
+
+    .toast.error {
+      border-left: 4px solid #e74c3c;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-message {
+      font-size: 14px;
+      color: #2C3E50;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📚 學生分組專題登記與查詢系統</h1>
+      <p>Student Project Registration & Query System</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('register')">
+        📝 登記專題
+      </div>
+      <div class="tab" onclick="switchTab('query')">
+        🔍 查詢專題
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- 登記專題頁面 -->
+      <div id="register-tab" class="tab-content active">
+        <form id="registerForm">
+          <div class="form-group">
+            <label class="form-label">
+              專題名稱<span class="required">*</span>
+              <span class="char-count" id="projectNameCount">0/50</span>
+            </label>
+            <input type="text" 
+                   class="form-input" 
+                   id="projectName" 
+                   maxlength="50" 
+                   placeholder="請輸入專題名稱" 
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              功能說明<span class="required">*</span>
+              <span class="char-count" id="descriptionCount">0/500</span>
+            </label>
+            <textarea class="form-textarea" 
+                      id="description" 
+                      maxlength="500" 
+                      placeholder="請描述專題的主要功能與特色" 
+                      required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              成員資料<span class="required">*</span>（2-3人）
+            </label>
+            <div class="members-container" id="membersContainer">
+              <!-- 成員1 -->
+              <div class="member-item" data-member="1">
+                <div class="member-header">
+                  <div class="member-title">成員 1</div>
+                </div>
+                <div class="member-fields">
+                  <div>
+                    <input type="text" class="form-input member-name" placeholder="姓名" required>
+                  </div>
+                  <div>
+                    <input type="text" class="form-input member-id" placeholder="學號" required>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 成員2 -->
+              <div class="member-item" data-member="2">
+                <div class="member-header">
+                  <div class="member-title">成員 2</div>
+                </div>
+                <div class="member-fields">
+                  <div>
+                    <input type="text" class="form-input member-name" placeholder="姓名" required>
+                  </div>
+                  <div>
+                    <input type="text" class="form-input member-id" placeholder="學號" required>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="add-member-btn" id="addMemberBtn" onclick="addMember()">
+              ➕ 新增第 3 位成員
+            </button>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              修改密碼<span class="required">*</span>
+            </label>
+            <input type="password" 
+                   class="form-input" 
+                   id="password" 
+                   placeholder="請設定密碼（用於日後修改專題資料）" 
+                   required>
+          </div>
+
+          <div class="btn-container">
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+              ✅ 送出登記
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- 查詢專題頁面 -->
+      <div id="query-tab" class="tab-content">
+        <div class="search-box">
+          <input type="text" 
+                 class="search-input" 
+                 id="searchInput" 
+                 placeholder="🔍 搜尋專題名稱或成員姓名..." 
+                 oninput="filterProjects()">
+        </div>
+
+        <div id="queryLoading" class="loading">
+          <div class="spinner"></div>
+          <p>載入中...</p>
+        </div>
+
+        <div id="projectsGrid" class="projects-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 修改專題 Modal -->
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">🔧 修改專題資料</div>
+        <button class="modal-close" onclick="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <!-- 密碼驗證區 -->
+        <div id="passwordVerify">
+          <input type="hidden" id="editProjectId">
+          <div class="form-group">
+            <label class="form-label">請輸入修改密碼</label>
+            <input type="password" 
+                   class="form-input" 
+                   id="verifyPassword" 
+                   placeholder="請輸入密碼">
+          </div>
+          <button class="btn btn-primary" onclick="verifyEditPassword()">
+            ✅ 驗證
+          </button>
+        </div>
+
+        <!-- 編輯表單 -->
+        <form id="editForm" style="display: none;">
+          <input type="hidden" id="editPassword">
+          
+          <div class="form-group">
+            <label class="form-label">
+              專題名稱
+              <span class="char-count" id="editProjectNameCount">0/50</span>
+            </label>
+            <input type="text" 
+                   class="form-input" 
+                   id="editProjectName" 
+                   maxlength="50" 
+                   required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              功能說明
+              <span class="char-count" id="editDescriptionCount">0/500</span>
+            </label>
+            <textarea class="form-textarea" 
+                      id="editDescription" 
+                      maxlength="500" 
+                      required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">成員資料</label>
+            <div class="members-container" id="editMembersContainer"></div>
+          </div>
+
+          <div class="btn-container">
+            <button type="submit" class="btn btn-primary">
+              ✅ 儲存修改
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 詳情 Modal -->
+  <div class="modal" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">📋 專題詳情</div>
+        <button class="modal-close" onclick="closeDetailModal()">&times;</button>
+      </div>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <!-- Toast 通知 -->
+  <div class="toast" id="toast">
+    <div class="toast-message" id="toastMessage"></div>
+  </div>
+
+  <script>
+    // ==================== ⭐ 設定區（唯一需要修改的地方）====================
+    
+    // TODO: 請將下方的網址改為您的 Apps Script Web App URL
+    const API_URL = 'YOUR_Apps_Script_Web_App_URL';
+    // 格式範例: 'https://script.google.com/macros/s/AKfycbzwWl7Q4ZdmWktkOFt0kYLlI7Ylvw0m1bnMd2jAnQEpt9e2MQKPR7qR5RKzE15o0CZH/exec'
+    
+    // ========================================================================
+
+    let allProjects = [];
+    let currentEditProjectId = null;
+
+    // ⭐ 修正後的 API 呼叫函數
+    async function callAPI(action, additionalData = {}) {
+      try {
+        // ⭐ 將 action 和所有資料都放在 POST body 中
+        const requestBody = {
+          action: action,
+          ...additionalData
+        };
+
+        console.log('發送請求:', action, requestBody);
+
+        const response = await fetch(API_URL, {  // ⭐ URL 不加參數
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP 錯誤：${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('收到回應:', result);
+        
+        return result;
+        
+      } catch (error) {
+        console.error('[API] 錯誤:', error);
+        return {
+          success: false,
+          message: `連線錯誤：${error.message}`
+        };
+      }
+    }
+
+    // Tab 切換
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      if (tabName === 'register') {
+        document.getElementById('register-tab').classList.add('active');
+      } else if (tabName === 'query') {
+        document.getElementById('query-tab').classList.add('active');
+        loadProjects();
+      }
+    }
+
+    // 字數統計
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('projectName').addEventListener('input', function() {
+        document.getElementById('projectNameCount').textContent = this.value.length + '/50';
+      });
+
+      document.getElementById('description').addEventListener('input', function() {
+        document.getElementById('descriptionCount').textContent = this.value.length + '/500';
+      });
+    });
+
+    // 成員管理
+    function addMember() {
+      const container = document.getElementById('membersContainer');
+      const memberCount = container.querySelectorAll('.member-item').length;
+
+      if (memberCount >= 3) {
+        showToast('最多只能新增 3 位成員', 'error');
+        return;
+      }
+
+      const memberItem = document.createElement('div');
+      memberItem.className = 'member-item';
+      memberItem.setAttribute('data-member', memberCount + 1);
+      memberItem.innerHTML = `
+        <div class="member-header">
+          <div class="member-title">成員 ${memberCount + 1}</div>
+          <button type="button" class="member-remove" onclick="removeMember(this)">
+            ✕ 移除
+          </button>
+        </div>
+        <div class="member-fields">
+          <div>
+            <input type="text" class="form-input member-name" placeholder="姓名" required>
+          </div>
+          <div>
+            <input type="text" class="form-input member-id" placeholder="學號" required>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(memberItem);
+
+      if (memberCount + 1 >= 3) {
+        document.getElementById('addMemberBtn').disabled = true;
+        document.getElementById('addMemberBtn').textContent = '已達成員上限';
+      }
+    }
+
+    function removeMember(btn) {
+      const memberItem = btn.closest('.member-item');
+      memberItem.remove();
+
+      const members = document.querySelectorAll('#membersContainer .member-item');
+      members.forEach((item, index) => {
+        item.setAttribute('data-member', index + 1);
+        item.querySelector('.member-title').textContent = `成員 ${index + 1}`;
+      });
+
+      const addBtn = document.getElementById('addMemberBtn');
+      addBtn.disabled = false;
+      addBtn.textContent = `➕ 新增第 ${members.length + 1} 位成員`;
+    }
+
+    // 表單送出
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const projectName = document.getElementById('projectName').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const password = document.getElementById('password').value;
+
+        const memberItems = document.querySelectorAll('#membersContainer .member-item');
+        const members = [];
+
+        memberItems.forEach(item => {
+          const name = item.querySelector('.member-name').value.trim();
+          const studentId = item.querySelector('.member-id').value.trim();
+          if (name && studentId) {
+            members.push({ name, studentId });
+          }
+        });
+
+        if (!projectName) {
+          showToast('請輸入專題名稱', 'error');
+          return;
+        }
+
+        if (!description) {
+          showToast('請輸入功能說明', 'error');
+          return;
+        }
+
+        if (members.length < 2) {
+          showToast('至少需要 2 位成員', 'error');
+          return;
+        }
+
+        if (!password) {
+          showToast('請設定修改密碼', 'error');
+          return;
+        }
+
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '送出中...';
+
+        // ⭐ 修正：所有資料都作為 additionalData 傳入
+        const result = await callAPI('addProject', {
+          projectName,
+          description,
+          members,
+          password
+        });
+        
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✅ 送出登記';
+
+        if (result.success) {
+          showToast(result.message, 'success');
+          document.getElementById('registerForm').reset();
+          document.getElementById('projectNameCount').textContent = '0/50';
+          document.getElementById('descriptionCount').textContent = '0/500';
+
+          const remainingMembers = document.querySelectorAll('#membersContainer .member-item');
+          if (remainingMembers.length > 2) {
+            remainingMembers[2].remove();
+            document.getElementById('addMemberBtn').disabled = false;
+            document.getElementById('addMemberBtn').textContent = '➕ 新增第 3 位成員';
+          }
+        } else {
+          showToast(result.message, 'error');
+        }
+      });
+    });
+
+    // 載入專題列表
+    async function loadProjects() {
+      const loading = document.getElementById('queryLoading');
+      const grid = document.getElementById('projectsGrid');
+
+      loading.classList.add('active');
+      grid.innerHTML = '';
+
+      const result = await callAPI('getProjectList');
+      
+      loading.classList.remove('active');
+
+      if (result.success) {
+        allProjects = result.data;
+        displayProjects(allProjects);
+      } else {
+        showToast(result.message, 'error');
+      }
+    }
+
+    // 顯示專題
+    function displayProjects(projects) {
+      const grid = document.getElementById('projectsGrid');
+      grid.innerHTML = '';
+
+      if (projects.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📭</div>
+            <div class="empty-state-text">尚無專題資料</div>
+            <div class="empty-state-subtext">請先到登記頁面新增專題</div>
+          </div>
+        `;
+        return;
+      }
+
+      projects.forEach(project => {
+        const memberNames = project.members.map(m => m.name).join('、');
+        
+        const card = document.createElement('div');
+        card.className = 'project-card';
+        card.innerHTML = `
+          <div class="project-title">${escapeHtml(project.projectName)}</div>
+          <div class="project-info">
+            <strong>登記時間：</strong>${project.registerTime}
+          </div>
+          <div class="project-members">${escapeHtml(memberNames)}</div>
+          <div class="project-description">${escapeHtml(project.description)}</div>
+          <div class="project-actions">
+            <button class="btn-edit" onclick="openEditModal(${project.id})">
+              🔧 修改
+            </button>
+            <button class="btn-detail" onclick="showDetail(${project.id})">
+              👁️ 詳情
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    // 搜尋過濾
+    function filterProjects() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      
+      const filtered = allProjects.filter(project => {
+        const nameMatch = project.projectName.toLowerCase().includes(searchTerm);
+        const memberMatch = project.members.some(m => 
+          m.name.toLowerCase().includes(searchTerm)
+        );
+        return nameMatch || memberMatch;
+      });
+
+      displayProjects(filtered);
+    }
+
+    // 修改功能
+    function openEditModal(projectId) {
+      currentEditProjectId = projectId;
+      document.getElementById('editProjectId').value = projectId;
+      document.getElementById('verifyPassword').value = '';
+      document.getElementById('passwordVerify').style.display = 'block';
+      document.getElementById('editForm').style.display = 'none';
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').classList.remove('active');
+      currentEditProjectId = null;
+    }
+
+    async function verifyEditPassword() {
+      const password = document.getElementById('verifyPassword').value;
+      const projectId = currentEditProjectId;
+
+      if (!password) {
+        showToast('請輸入密碼', 'error');
+        return;
+      }
+
+      // ⭐ 修正：所有資料都傳入 additionalData
+      const result = await callAPI('verifyPassword', { 
+        projectId, 
+        password 
+      });
+      
+      if (result.success) {
+        document.getElementById('editPassword').value = password;
+        document.getElementById('passwordVerify').style.display = 'none';
+        
+        const data = result.data;
+        document.getElementById('editProjectName').value = data.projectName;
+        document.getElementById('editDescription').value = data.description;
+        document.getElementById('editProjectNameCount').textContent = data.projectName.length + '/50';
+        document.getElementById('editDescriptionCount').textContent = data.description.length + '/500';
+
+        const container = document.getElementById('editMembersContainer');
+        container.innerHTML = '';
+        data.members.forEach((member, index) => {
+          const memberItem = document.createElement('div');
+          memberItem.className = 'member-item';
+          memberItem.innerHTML = `
+            <div class="member-header">
+              <div class="member-title">成員 ${index + 1}</div>
+            </div>
+            <div class="member-fields">
+              <div>
+                <input type="text" class="form-input member-name" value="${escapeHtml(member.name)}" required>
+              </div>
+              <div>
+                <input type="text" class="form-input member-id" value="${escapeHtml(member.studentId)}" required>
+              </div>
+            </div>
+          `;
+          container.appendChild(memberItem);
+        });
+
+        document.getElementById('editForm').style.display = 'block';
+
+        document.getElementById('editProjectName').addEventListener('input', function() {
+          document.getElementById('editProjectNameCount').textContent = this.value.length + '/50';
+        });
+        document.getElementById('editDescription').addEventListener('input', function() {
+          document.getElementById('editDescriptionCount').textContent = this.value.length + '/500';
+        });
+      } else {
+        showToast(result.message, 'error');
+      }
+    }
+
+    // 送出修改
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('editForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const projectId = parseInt(document.getElementById('editProjectId').value);
+        const password = document.getElementById('editPassword').value;
+        const projectName = document.getElementById('editProjectName').value.trim();
+        const description = document.getElementById('editDescription').value.trim();
+
+        const memberItems = document.querySelectorAll('#editMembersContainer .member-item');
+        const members = [];
+        memberItems.forEach(item => {
+          const name = item.querySelector('.member-name').value.trim();
+          const studentId = item.querySelector('.member-id').value.trim();
+          if (name && studentId) {
+            members.push({ name, studentId });
+          }
+        });
+
+        // ⭐ 修正：所有資料都傳入 additionalData
+        const result = await callAPI('updateProject', {
+          projectId,
+          password,
+          formData: {
+            projectName,
+            description,
+            members
+          }
+        });
+        
+        if (result.success) {
+          showToast(result.message, 'success');
+          closeEditModal();
+          loadProjects();
+        } else {
+          showToast(result.message, 'error');
+        }
+      });
+    });
+
+    // 顯示詳情
+    function showDetail(projectId) {
+      const project = allProjects.find(p => p.id === projectId);
+      if (!project) return;
+
+      const membersHtml = project.members.map(m => 
+        `<div style="margin-bottom: 8px;">
+          <strong>${escapeHtml(m.name)}</strong> (${escapeHtml(m.studentId)})
+        </div>`
+      ).join('');
+
+      const content = `
+        <div style="line-height: 1.8; padding: 30px;">
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">專題名稱</div>
+            <div style="font-size: 20px; font-weight: bold; color: #2C3E50;">${escapeHtml(project.projectName)}</div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">登記時間</div>
+            <div style="color: #2C3E50;">${project.registerTime}</div>
+          </div>
+
+          ${project.lastModified ? `
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 5px;">最後修改</div>
+            <div style="color: #2C3E50;">${project.lastModified}</div>
+          </div>
+          ` : ''}
+
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 10px;">成員資料</div>
+            ${membersHtml}
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <div style="color: #7f8c8d; font-size: 13px; margin-bottom: 10px;">功能說明</div>
+            <div style="color: #555; line-height: 1.8; white-space: pre-wrap;">${escapeHtml(project.description)}</div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('detailContent').innerHTML = content;
+      document.getElementById('detailModal').classList.add('active');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('detailModal').classList.remove('active');
+    }
+
+    // Toast 通知
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+
+      toast.className = 'toast ' + type + ' active';
+      toastMessage.textContent = message;
+
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 3000);
+    }
+
+    // 工具函數
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // 點擊 Modal 外部關閉
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('editModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeEditModal();
+        }
+      });
+
+      document.getElementById('detailModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeDetailModal();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
